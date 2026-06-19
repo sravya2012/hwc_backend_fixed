@@ -19,14 +19,10 @@ model    = joblib.load("P5model.pkl")
 scaler   = joblib.load("P5scaler.pkl")
 FEATURES = joblib.load("P5feature_columns.pkl")
 
-# ── Known URBAN zones → always LOW risk ─────────────────────────
+# ── Urban zones → always LOW ─────────────────────────────────────
 URBAN_ZONES = [
-    (12.90, 77.50, 0.5, "Bengaluru"),
-    (12.97, 77.59, 0.5, "Bengaluru"),
-    (12.80, 77.40, 0.4, "Bengaluru"),
-    (13.00, 77.60, 0.4, "Bengaluru"),
-    (13.10, 77.50, 0.4, "Bengaluru North"),
-    (12.70, 77.50, 0.4, "Bengaluru South"),
+    (12.90, 77.50, 0.6, "Bengaluru"),
+    (12.97, 77.59, 0.6, "Bengaluru"),
     (12.30, 76.64, 0.4, "Mysuru"),
     (12.87, 74.88, 0.3, "Mangaluru"),
     (13.00, 76.10, 0.3, "Hassan"),
@@ -37,39 +33,48 @@ URBAN_ZONES = [
     (11.34, 77.72, 0.3, "Erode"),
     (11.65, 78.15, 0.3, "Salem"),
     (10.00, 77.00, 0.3, "Madurai"),
-    (13.93, 75.57, 0.3, "Shimoga"),
+    (13.93, 75.57, 0.3, "Shimoga City"),
+    (12.72, 77.28, 0.3, "Ramanagara"),
+    (12.65, 77.20, 0.3, "Channapatna"),
+    (13.13, 78.13, 0.3, "Kolar"),
+    (13.43, 77.73, 0.3, "Chikkaballapur"),
+    (15.14, 76.92, 0.3, "Bellary"),
     (14.47, 75.92, 0.3, "Davangere"),
     (15.13, 75.71, 0.3, "Hubli"),
-    (10.80, 76.65, 0.3, "Palakkad"),
+    (10.80, 76.65, 0.3, "Palakkad City"),
     (11.25, 75.77, 0.3, "Kozhikode"),
     (10.00, 76.96, 0.3, "Kochi"),
-    (8.50,  76.95, 0.3, "Thiruvananthapuram"),
 ]
 
-# ── Known FOREST/HIGH RISK zones ────────────────────────────────
+# ── Forest zones → HIGH risk (expanded radii) ────────────────────
 FOREST_ZONES = [
-    (11.9, 76.1, 0.8,  0.82, 900,  12, 0.2, 0.4, 1.5, "Nagarhole"),
-    (11.6, 76.4, 0.9,  0.80, 860,  15, 0.2, 0.3, 1.8, "Bandipur"),
-    (11.6, 76.1, 0.8,  0.85, 790,  18, 0.1, 0.2, 1.6, "Wayanad"),
-    (12.4, 75.7, 0.7,  0.84, 1000, 22, 0.2, 0.3, 2.0, "Kodagu"),
-    (13.1, 75.3, 0.6,  0.86, 1100, 26, 0.2, 0.3, 2.5, "Kudremukh"),
-    (11.9, 77.0, 0.7,  0.76, 1050, 20, 0.3, 0.5, 2.0, "BRT Hills"),
+    # lat,  lon,  radius, NDVI, elev, slope, df,  dw,  dr,  name
+    (11.9, 76.1, 1.0,  0.82, 900,  12, 0.2, 0.4, 1.5, "Nagarhole"),
+    (11.6, 76.4, 1.0,  0.80, 860,  15, 0.2, 0.3, 1.8, "Bandipur"),
+    (11.6, 76.1, 1.0,  0.85, 790,  18, 0.1, 0.2, 1.6, "Wayanad"),
+    (12.4, 75.7, 1.0,  0.84, 1000, 22, 0.2, 0.3, 2.0, "Kodagu"),
+    (13.1, 75.3, 0.8,  0.86, 1100, 26, 0.2, 0.3, 2.5, "Kudremukh"),
+    (11.9, 77.0, 0.8,  0.76, 1050, 20, 0.3, 0.5, 2.0, "BRT Hills"),
     (11.5, 77.2, 0.8,  0.74, 820,  16, 0.3, 0.5, 2.2, "Sathyamangalam"),
-    (10.5, 76.9, 0.7,  0.80, 880,  17, 0.2, 0.4, 2.0, "Anamalai"),
-    (11.4, 76.7, 0.6,  0.78, 1100, 24, 0.2, 0.3, 2.5, "Nilgiris"),
-    (13.6, 75.6, 0.5,  0.77, 830,  14, 0.2, 0.4, 2.0, "Bhadra"),
-    (12.6, 75.7, 0.5,  0.83, 1000, 22, 0.2, 0.3, 2.0, "Pushpagiri"),
-    (14.0, 74.8, 0.6,  0.80, 680,  16, 0.2, 0.2, 2.5, "Sharavathi"),
-    (13.4, 75.1, 0.5,  0.85, 820,  22, 0.2, 0.3, 2.5, "Agumbe"),
-    (14.6, 74.8, 0.5,  0.78, 600,  18, 0.3, 0.4, 3.0, "Sirsi"),
-    (11.2, 77.5, 0.5,  0.79, 940,  20, 0.2, 0.3, 2.5, "Kalakad"),
-    (12.0, 75.5, 0.6,  0.80, 850,  18, 0.2, 0.3, 2.0, "Coorg Buffer"),
-    (11.0, 76.5, 0.6,  0.78, 820,  16, 0.2, 0.4, 2.0, "Palakkad Gap"),
-    (10.8, 76.7, 0.5,  0.76, 750,  14, 0.3, 0.4, 2.0, "Silent Valley"),
+    (10.5, 76.9, 0.8,  0.80, 880,  17, 0.2, 0.4, 2.0, "Anamalai"),
+    (11.4, 76.7, 0.8,  0.78, 1100, 24, 0.2, 0.3, 2.5, "Nilgiris"),
+    (13.5, 75.7, 0.8,  0.77, 830,  14, 0.2, 0.4, 2.0, "Bhadra"),    # expanded + moved
+    (13.3, 75.8, 0.7,  0.80, 900,  16, 0.2, 0.3, 2.0, "Chikmagalur Forest"),  # NEW
+    (12.6, 75.7, 0.7,  0.83, 1000, 22, 0.2, 0.3, 2.0, "Pushpagiri"),
+    (14.0, 74.8, 0.7,  0.80, 680,  16, 0.2, 0.2, 2.5, "Sharavathi"),
+    (13.4, 75.1, 0.7,  0.85, 820,  22, 0.2, 0.3, 2.5, "Agumbe"),
+    (14.6, 74.8, 0.7,  0.78, 600,  18, 0.3, 0.4, 3.0, "Sirsi"),
+    (11.2, 77.5, 0.7,  0.79, 940,  20, 0.2, 0.3, 2.5, "Kalakad"),
+    (12.0, 75.5, 0.8,  0.80, 850,  18, 0.2, 0.3, 2.0, "Coorg Buffer"),
+    (12.5, 76.0, 0.7,  0.81, 870,  19, 0.2, 0.3, 2.0, "Kabini"),    # NEW
+    (12.2, 75.9, 0.7,  0.82, 880,  20, 0.2, 0.3, 2.0, "Brahmagiri"), # NEW
+    (11.0, 76.5, 0.7,  0.78, 820,  16, 0.2, 0.4, 2.0, "Palakkad Gap"),
+    (10.8, 76.7, 0.7,  0.76, 750,  14, 0.3, 0.4, 2.0, "Silent Valley"),
+    (15.2, 74.6, 0.7,  0.79, 580,  17, 0.3, 0.4, 2.5, "Dandeli"),   # NEW
+    (12.4, 76.0, 0.9,  0.82, 860,  18, 0.2, 0.3, 2.0, "Namdroling Area"), # NEW
 ]
 
 def is_urban(lat, lon):
-    """Check if coordinate is in a known urban zone"""
     for ulat, ulon, radius, name in URBAN_ZONES:
         dist = math.sqrt((lat - ulat)**2 + (lon - ulon)**2)
         if dist <= radius:
@@ -77,7 +82,7 @@ def is_urban(lat, lon):
     return False, None
 
 def estimate_features(lat, lon):
-    in_ghats = (74.0 <= lon <= 77.5) and (10.0 <= lat <= 14.5)
+    in_ghats = (74.0 <= lon <= 77.5) and (10.0 <= lat <= 15.5)
 
     best_dist = float('inf')
     best_zone = None
@@ -131,29 +136,8 @@ def build_features(lat, lon, NDVI, NDWI, elevation, slope,
             eco_stress, slope_elev_risk]
 
 def get_location_name(lat, lon):
-    places = [
-        (11.93, 76.13, "Nagarhole Forest"),
-        (11.67, 76.63, "Bandipur Tiger Reserve"),
-        (11.61, 76.13, "Wayanad Wildlife Sanctuary"),
-        (11.56, 76.52, "Mudumalai Tiger Reserve"),
-        (13.15, 75.25, "Kudremukh National Park"),
-        (12.42, 75.74, "Kodagu Forest"),
-        (11.98, 77.05, "BRT Tiger Reserve"),
-        (11.50, 77.23, "Sathyamangalam Tiger Reserve"),
-        (10.57, 76.93, "Anamalai Tiger Reserve"),
-        (11.41, 76.73, "Nilgiris Biosphere"),
-        (13.65, 75.62, "Bhadra Wildlife Sanctuary"),
-        (13.40, 75.10, "Agumbe Rainforest"),
-        (14.60, 74.84, "Sirsi Forest"),
-        (10.80, 76.70, "Silent Valley"),
-        (12.90, 77.50, "Bengaluru"),
-        (12.97, 77.59, "Bengaluru"),
-        (12.30, 76.64, "Mysuru"),
-        (12.87, 74.88, "Mangaluru"),
-        (13.00, 76.10, "Hassan"),
-        (11.02, 76.96, "Coimbatore"),
-        (10.52, 76.21, "Thrissur"),
-    ]
+    places = [(z[0], z[1], z[9]) for z in FOREST_ZONES]
+    places += [(u[0], u[1], u[3]) for u in URBAN_ZONES]
     best_dist = float('inf')
     best_name = f"({lat:.2f}, {lon:.2f})"
     for plat, plon, name in places:
@@ -161,12 +145,12 @@ def get_location_name(lat, lon):
         if dist < best_dist:
             best_dist = dist
             best_name = name
-    if best_dist > 0.5:
+    if best_dist > 0.6:
         best_name = f"({lat:.2f}, {lon:.2f})"
     return best_name
 
 def run_prediction(lat: float, lon: float):
-    # Check urban zone first — always LOW
+    # Urban check first — always LOW
     urban, urban_name = is_urban(lat, lon)
     if urban:
         return {
@@ -178,14 +162,13 @@ def run_prediction(lat: float, lon: float):
             "lon":         lon,
         }
 
-    # Otherwise use model
     NDVI, NDWI, elev, slope, df, dw, dr = estimate_features(lat, lon)
-    feats = build_features(lat, lon, NDVI, NDWI, elev, slope, df, dw, dr)
-    dfx   = pd.DataFrame([feats], columns=FEATURES)
-    prob  = float(model.predict_proba(scaler.transform(dfx))[0][1] * 100)
-    risk  = "HIGH" if prob >= 70 else "MEDIUM" if prob >= 40 else "LOW"
+    feats    = build_features(lat, lon, NDVI, NDWI, elev, slope, df, dw, dr)
+    dfx      = pd.DataFrame([feats], columns=FEATURES)
+    prob     = float(model.predict_proba(scaler.transform(dfx))[0][1] * 100)
+    risk     = "HIGH" if prob >= 70 else "MEDIUM" if prob >= 40 else "LOW"
     location = get_location_name(lat, lon)
-    driver = "NDVI" if NDVI > 0.65 else "dist_forest"
+    driver   = "NDVI" if NDVI > 0.65 else "dist_forest"
 
     return {
         "risk":        risk,
